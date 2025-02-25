@@ -1,8 +1,19 @@
 import requests
-
+import configparser
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from ytmusicapi import YTMusic, OAuthCredentials
+
+def get_api_key(id):
+    config = configparser.ConfigParser()
+    config.read(filenames='.env/config.ini')
+    return config['oauth'][id]
+
+def oauth():    
+    client_id = get_api_key("client_id")
+    client_secret = get_api_key("client_secret")    
+    ytm = YTMusic(".env/oauth.json",oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))   
+    return ytm
 
 #https://stackoverflow.com/questions/4356538/how-can-i-extract-video-id-from-youtubes-link-in-python :)
 #turn url into video ID for search Query
@@ -128,14 +139,13 @@ def main():
     id = linkTOID(linkYoutube)
     samples = findSongSamples(id)
     readSamples(id, samples)
-
-client_id = "895350166514-7ehre07r2at4tt5bb2spbsqp6a6dsb7k.apps.googleusercontent.com"
-client_secret = "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"
-ytm = YTMusic("oauth.json",oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))   
-
+    
+ytm = oauth()
 main()
 
 
 
 #playlistAdder("PLv9DYoydAiAGSLnFJ1osV8qU5aVqk4XWp", samples)
 #https://music.youtube.com/playlist?list=PLv9DYoydAiAGSLnFJ1osV8qU5aVqk4XWp&si=tuauDViC4-BXqheq
+
+#https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL
