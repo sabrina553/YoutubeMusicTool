@@ -46,12 +46,10 @@ def linkTOID(Link):
         return query.path[1:]
     
     if query.path == '/playlist': 
-        a = []               
-        #get playlist id from url
-        p = query.query[5:].partition("&")
-        
+        a = []
+        p = playlistLink(Link)        
         #get tracks from playlist
-        playlist = ytm.get_playlist(p[0])
+        playlist = ytm.get_playlist(p)
         playlist = playlist['tracks']
 
         #extract song id for playlist.
@@ -77,6 +75,20 @@ def linkTOID(Link):
     # fail?
     return None 
 
+def playlistLink(Link):               
+    #get playlist id from url  
+    query = urlparse(Link)   
+    query = query.query[5:].partition("&")
+    return query[0]
+
+def convertToList(yay):
+    id = []
+    if type(yay) != list:
+        id.append(yay)
+    else: 
+        id = yay
+    return id
+
 def ReadableData(ID):    
     songData = ytm.get_song(ID)    
     #readable list
@@ -89,10 +101,10 @@ def samplesUrl(ID):
     data[0] = "-".join(data[0].split())
     data[1] = "-".join(data[1].split())
     #create url
-    return f"https://www.whosampled.com/{data[1]}/{data[0]}"    
+    return f"https://www.whosampled.com/{data[1]}/{data[0]}/samples"    
 
 def sampleFinder(Link):    
-    response = session.get(Link)  
+    response = session.get(Link)      
     if response.status_code == 404:
         response = session.get(Link[:-8])
 
@@ -106,14 +118,7 @@ def soup():
     with open('cache.html', 'rb') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')    
     samples = []   
-    """ FOR original link, needs changes for /samples
-    for link in soup.find_all('tr'):
-        a = link.find('a')         
-        a = str(a.contents[1])        
-        a = a.split('"')
-        samples.append(a[1])
-    return samples
-    """
+
     for i in soup.find_all("td", class_="tdata__td1"):
         j = (i.find('a'))
         j = str(j.contents[1])
@@ -126,7 +131,7 @@ def songSearch(myList = []):
     for i in myList:    
         #needs work to search multiple songs    
         a = ytm.search(query=i, filter="songs", limit=1, ignore_spelling=True) 
-        
+
         if len(a) == 1:  
             b.append([a[0]['videoId'],a[0]['title'],a[0]['artists'][0]['name'],a[0]['artists'][0]['id']])            
         elif len(a) > 1:      
@@ -139,8 +144,9 @@ def songID(mylist = []):
         a.append(i[0])
     return a
 
-def playlistAdder(PID, SID):
-    ytm.add_playlist_items(playlistId=PID, videoIds=SID, duplicates=False)
+def playlistAdder(PID, SID):    
+    PID = playlistLink(PID)    
+    ytm.add_playlist_items(playlistId=PID, videoIds=SID)
     return
 
 ########################
@@ -148,46 +154,39 @@ def playlistAdder(PID, SID):
 def findSongSamples(ID):  
     a = [] 
     for i in ID: 
-        linkSample = samplesUrl(i)   
-        print(linkSample)     
+        linkSample = samplesUrl(i)    
         samples = sampleFinder(linkSample)        
         a.append(songSearch(samples))
 
     return(a)
 
 def readSamples(link, samples = []):
-    j=0
-    for i in link:   
+    j=0    
+    counter = 0 
+    for i in link: 
+        samplesVideoID = []  
         if len(samples[j]) > 0:
+            counter += len(samples)
             currentSong = ReadableData(i)  
             print(f"Songs sampled in {currentSong[0]} \n")  
-            for k in samples[j]:                
-                print(f"{k[1]} - {k[2]}")          
+            for k in samples[j]:  
+                samplesVideoID.append(k[0])           
+                print(f"{k[1]} - {k[2]}")                 
+                
             print("\n")
+            playlistAdder("https://music.youtube.com/playlist?list=PLv9DYoydAiAHk1y3FkE3rJ1Cbd_KNyYzn&si=g2lE5-e44jbfQqBq", samplesVideoID)  
         j+=1
+    print(counter)
 
-def main():
-    
-    init()
-    id = []
+def main():    
+    init()   
+
     linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL" #DAMN.
-    linkYoutube = "https://music.youtube.com/watch?v=LfjmxgjNP2g&si=4mdjZ6LDygf9Xrsn" 
-    yay = linkTOID(linkYoutube)    
-    if type(yay) != list:
-        id.append(yay)
-    else: 
-        id = yay
+    #linkYoutube = "https://music.youtube.com/watch?v=LfjmxgjNP2g&si=4mdjZ6LDygf9Xrsn" 
+    id = linkTOID(linkYoutube)    
+    id = convertToList(id)
+
     samples = findSongSamples(id)    
     readSamples(id, samples)
-
-
+    
 main()
-
-
-
-
-
-#playlistAdder("PLv9DYoydAiAGSLnFJ1osV8qU5aVqk4XWp", samples)
-#https://music.youtube.com/playlist?list=PLv9DYoydAiAGSLnFJ1osV8qU5aVqk4XWp&si=tuauDViC4-BXqheq
-
-#https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL
