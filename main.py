@@ -89,7 +89,7 @@ def samplesUrl(ID):
     data[0] = "-".join(data[0].split())
     data[1] = "-".join(data[1].split())
     #create url
-    return f"https://www.whosampled.com/{data[1]}/{data[0]}/samples"    
+    return f"https://www.whosampled.com/{data[1]}/{data[0]}"    
 
 def sampleFinder(Link):    
     response = session.get(Link)  
@@ -98,7 +98,7 @@ def sampleFinder(Link):
 
     with open('cache.html', 'wb') as f:
         f.write(response.content)
-        
+    
     samples = soup()
     return samples
 
@@ -125,10 +125,12 @@ def songSearch(myList = []):
     b = []
     for i in myList:    
         #needs work to search multiple songs    
-        a = ytm.search(query=i, filter="songs", limit=1) 
-        print(a[1]['title']) 
-        #videoid, title, aritst name, artistid      
-        b.append([a[1]['videoId'],a[1]['title'],a[1]['artists'][0]['name'],a[1]['artists'][0]['id']])        
+        a = ytm.search(query=i, filter="songs", limit=1, ignore_spelling=True) 
+        
+        if len(a) == 1:  
+            b.append([a[0]['videoId'],a[0]['title'],a[0]['artists'][0]['name'],a[0]['artists'][0]['id']])            
+        elif len(a) > 1:      
+            b.append([a[1]['videoId'],a[1]['title'],a[1]['artists'][0]['name'],a[1]['artists'][0]['id']])        
     return b
     
 def songID(mylist = []):
@@ -146,7 +148,8 @@ def playlistAdder(PID, SID):
 def findSongSamples(ID):  
     a = [] 
     for i in ID: 
-        linkSample = samplesUrl(i)        
+        linkSample = samplesUrl(i)   
+        print(linkSample)     
         samples = sampleFinder(linkSample)        
         a.append(songSearch(samples))
 
@@ -168,7 +171,7 @@ def main():
     init()
     id = []
     linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL" #DAMN.
-    #linkYoutube = "https://music.youtube.com/watch?v=0QO5_QGS5ds&si=vr2nFUzq0x4ZXXdM" 
+    linkYoutube = "https://music.youtube.com/watch?v=LfjmxgjNP2g&si=4mdjZ6LDygf9Xrsn" 
     yay = linkTOID(linkYoutube)    
     if type(yay) != list:
         id.append(yay)
