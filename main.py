@@ -18,9 +18,25 @@ def oauth():
 #https://stackoverflow.com/questions/4356538/how-can-i-extract-video-id-from-youtubes-link-in-python :)
 #turn url into video ID for search Query
 def linkTOID(Link):   
-    query = urlparse(Link)    
+    query = urlparse(Link)       
     if query.hostname == 'youtu.be':
         return query.path[1:]
+    
+    if query.path == '/playlist': 
+        a = []               
+        #get playlist id from url
+        p = query.query[5:].partition("&")
+        
+        #get tracks from playlist
+        playlist = ytm.get_playlist(p[0])
+        playlist = playlist['tracks']
+
+        #extract song id for playlist.
+        for i in playlist:
+            a.append(i['videoId'])
+
+        return a
+            
     if query.hostname in ('www.youtube.com', 'youtube.com', 'm.youtube.com'):
         if query.path == '/watch':            
             p = urlparse(query.query)            
@@ -29,6 +45,7 @@ def linkTOID(Link):
             return query.path.split('/')[2]
         if query.path[:3] == '/v/':
             return query.path.split('/')[2]
+        
     if query.hostname in ('music.youtube.com'):
         if query.path == '/watch':            
             p = urlparse(query.query)   
@@ -76,7 +93,7 @@ def sampleFinder(Link):
     with open('cache.html', 'wb') as f:
         f.write(response.content)
     
-    
+    print(response.content)
     samples = soup()
     return samples
 
@@ -120,28 +137,40 @@ def playlistAdder(PID, SID):
 
 ########################
 
-def findSongSamples(ID):    
-    linkSample = samplesUrl(ID)
-    samples = sampleFinder(linkSample)
-    samples = songSearch(samples)
-    return(samples)
+def findSongSamples(ID):  
+    a = [] 
+    for i in ID: 
+        linkSample = samplesUrl(i)        
+        samples = sampleFinder(linkSample)
+        a.append(songSearch(samples))
+
+    return(a)
 
 def readSamples(link, samples = []):
-    currentSong = ReadableData(link)
-    print(f"Songs sampled in {currentSong[0]}")
-    for i in samples:
-        print(f"{i[1]}  {i[2]}")
-    return
-
+    j=0
+    for i in link:   
+        if len(samples[j]) > 0:
+            currentSong = ReadableData(i)  
+            print(f"Songs sampled in {currentSong[0]} \n")  
+            for k in samples[j]:                
+                print(f"{k[1]} - {k[2]}")          
+            print("\n")
+        j+=1
 
 def main():
-    linkYoutube = "https://youtu.be/Dm-foWGDBF0" #DUCKWORTH
-    id = linkTOID(linkYoutube)
-    samples = findSongSamples(id)
+    id = []
+    #linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL" #DAMN.
+    linkYoutube = "https://music.youtube.com/watch?v=0QO5_QGS5ds&si=vr2nFUzq0x4ZXXdM" 
+    yay = linkTOID(linkYoutube)    
+    if type(yay) != list:
+        id.append(yay)
+    samples = findSongSamples(id)    
     readSamples(id, samples)
-    
+
 ytm = oauth()
 main()
+
+
 
 
 
