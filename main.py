@@ -146,18 +146,18 @@ def songID(mylist = []):
 
 def playlistAdder(PID, SID):    
     PID = playlistLink(PID)    
-    ytm.add_playlist_items(playlistId=PID, videoIds=SID)
+    ytm.add_playlist_items(playlistId=PID, videoIds=SID,duplicates=False)
     return
 
 ########################
 
 def findSongSamples(ID):  
     a = [] 
-    for i in ID: 
-        linkSample = samplesUrl(i)    
-        samples = sampleFinder(linkSample)        
+    for i in ID:        
+        linkSample = samplesUrl(i)           
+        samples = sampleFinder(linkSample)              
         a.append(songSearch(samples))
-
+       
     return(a)
 
 def readSamples(link, samples = []):
@@ -165,8 +165,7 @@ def readSamples(link, samples = []):
     counter = 0 
     for i in link: 
         samplesVideoID = []  
-        if len(samples[j]) > 0:
-            counter += len(samples)
+        if len(samples[j]) > 0:            
             currentSong = ReadableData(i)  
             print(f"Songs sampled in {currentSong[0]} \n")  
             for k in samples[j]:  
@@ -176,17 +175,19 @@ def readSamples(link, samples = []):
             print("\n")
             playlistAdder("https://music.youtube.com/playlist?list=PLv9DYoydAiAHk1y3FkE3rJ1Cbd_KNyYzn&si=g2lE5-e44jbfQqBq", samplesVideoID)  
         j+=1
-    print(counter)
+    
 
 def main():    
     init()   
-
+    
     linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL" #DAMN.
     #linkYoutube = "https://music.youtube.com/watch?v=LfjmxgjNP2g&si=4mdjZ6LDygf9Xrsn" 
-    id = linkTOID(linkYoutube)    
-    id = convertToList(id)
-
-    samples = findSongSamples(id)    
+    id = linkTOID(linkYoutube)        
+    id = convertToList(id)    
+    samples = findSongSamples(id)     
     readSamples(id, samples)
     
 main()
+
+
+#1:50 for damn, 1;23 for sample bit..
