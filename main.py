@@ -4,18 +4,21 @@ from bs4 import BeautifulSoup
 
 from auth import oauth
 
-class YouTubeAPI:
-
-    
+class YouTubeAPI:    
     def __init__(self):
         """Initialize the YouTubeAPI class."""
-        self.ytm = None
+        self.youtube = None
         self.init()
 
     def init(self):
-        """Initialize the YouTube API."""
-        global ytm
-        ytm = oauth()
+        """Initialize the YouTube API."""        
+        self.youtube = oauth()
+
+    def songIdInPlaylist(self, id):        
+        request = self.youtube.playlistItems().list(part="snippet,contentDetails", maxResults=25, playlistId=id)           
+        tracks = request.execute()
+        return [item['contentDetails']['videoId'] for item in tracks['items']]
+        
 
     def link_to_id(self, link):
         """Convert a YouTube link to a video or playlist ID."""
@@ -24,8 +27,8 @@ class YouTubeAPI:
             return query.path[1:]
 
         if query.path == '/playlist':
-            return [track['videoId'] for track in self.ytm.get_playlist(self.playlist_link(link))['tracks']]
-
+            return self.songIdInPlaylist(self.playlist_id(link))
+            
         if query.hostname in ('www.youtube.com', 'youtube.com', 'm.youtube.com'):
             if query.path == '/watch':
                 return parse_qs(query.query)['v'][0]
@@ -39,21 +42,25 @@ class YouTubeAPI:
                 return parse_qs(query.query)['v'][0]
         return None
 
-    def playlist_link(self, link):
+    def playlist_id(self, link):
         """Extract the playlist ID from a YouTube link."""
         query = urlparse(link)
         return parse_qs(query.query)['list'][0]
 
     def readable_data(self, id):
         """Retrieve readable data for a YouTube video."""
-        song_data = self.ytm.get_song(id)
+        song_data = self.youtube.get_song(id)
+
+        
+
+
         return [song_data["videoDetails"]["title"], song_data["videoDetails"]["author"], song_data["microformat"]["microformatDataRenderer"]["urlCanonical"]]
 
     def song_search(self, my_list=[]):
         """Search for songs on YouTube."""
         b = []
         for i in my_list:
-            a = self.ytm.search(query=i, filter="songs", limit=1, ignore_spelling=True)
+            a = self.youtube.search(query=i, filter="songs", limit=1, ignore_spelling=True)
             if len(a) == 1:
                 b.append([a[0]['videoId'], a[0]['title'], a[0]['artists'][0]['name'], a[0]['artists'][0]['id']])
             elif len(a) > 1:
@@ -63,7 +70,7 @@ class YouTubeAPI:
     def add_to_playlist(self, pid, sid):
         """Add songs to a YouTube playlist."""
         pid = self.playlist_link(pid)
-        self.ytm.add_playlist_items(playlistId=pid, videoIds=sid, duplicates=False)
+        self.youtube.add_playlist_items(playlistId=pid, videoIds=sid, duplicates=False)
 
 
 class WhoSampledAPI:
@@ -153,9 +160,9 @@ class MusicSampler:
     def main(self):
         """Main function to find and read song samples."""
         link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=1b8r7gmgrMzJesz9"  # DAMN.
-        ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))
-        
-        #samples = self.find_song_samples(ids)
+        ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))        
+        samples = self.find_song_samples(ids)
+
         #self.read_samples(ids, samples)
 
 

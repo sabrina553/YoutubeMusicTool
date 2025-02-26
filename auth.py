@@ -41,16 +41,38 @@ def oauth():
      # Create an API client
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
+    return youtube
 
-""" def main():       
-    request = youtube.videos().list(
-        part="snippet,contentDetails,statistics",
-        id="GfpxPWSH_qg"
+def main():     
+    oauth()  
+
+    request = youtube.playlistItems().list(
+        part="snippet,contentDetails",
+        maxResults=25,
+        playlistId="OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ"
     )
+
     
-    response = request.execute()
-    print("\n")
-    print(response)
+    tracks = request.execute()
+    cat = [item['contentDetails']['videoId'] for item in tracks['items']]
+    print(cat)
+
+    """for item in tracks['items']:
+        title = item['snippet']['title']
+        video_id = item['contentDetails']['videoId']
+        print(f"Title: {title}, Video ID: {video_id}")"""
+    
+    
+    #return [track['videoId'] for track in self.youtube.playlistItems.list(self.playlist_link(link))['tracks']]
+        
+    #track = [['videoId'] for track in request.execute()]
+    
+    
+    
+
+
+
+
 
 if __name__ == "__main__":
-    main() """
+    main() 
