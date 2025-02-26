@@ -157,11 +157,11 @@ class MusicSampler:
                     print(f"{s[1]} - {s[2]}")
                 print("\n")
                 # Uncomment the following line to add samples to a playlist
-                # self.youtube_api.add_to_playlist("https://music.youtube.com/playlist?list=PLv9DYoydAiAG_ERsqhCXbbeEDDE8IeCbm&si=VsN7FRCoGRl92ViR", sample_video_ids)
+                #self.youtube_api.add_to_playlist("https://music.youtube.com/playlist?list=PLv9DYoydAiAG9yqDeiAJ-MYUvV0d4i5jd&si=IJcE7Bjo2BDUsL-G", sample_video_ids)
 
     def main(self):
         """Main function to find and read song samples."""
-        link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8"  # DAMN.
+        link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=1b8r7gmgrMzJesz9"  # DAMN.
         ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))
         samples = self.find_song_samples(ids)
         self.read_samples(ids, samples)
