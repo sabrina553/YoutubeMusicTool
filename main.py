@@ -1,31 +1,15 @@
 import requests
-import configparser
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
-from ytmusicapi import YTMusic, OAuthCredentials
+
+from auth import oauth, unauth
 
 class YouTubeAPI:
     def __init__(self):
         """Initialize the YouTubeAPI class."""
-        self.ytm = None
-        self.init()
-
-    def get_api_key(self, id):
-        """Retrieve the API key from the configuration file."""
-        config = configparser.ConfigParser()
-        config.read(filenames='.env/config.ini')
-        return config['oauth'][id]
-
-    def oauth(self):
-        """Authenticate with the YouTube API using OAuth."""
-        client_id = self.get_api_key("client_id")
-        client_secret = self.get_api_key("client_secret")
-        self.ytm = YTMusic(".env/oauth.json", oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))
-
-    def init(self):
-        """Initialize the YouTube API."""
-        self.oauth()
-
+        self.ytm = unauth()
+        self.ytmauth = oauth()        
+ 
     def link_to_id(self, link):
         """Convert a YouTube link to a video or playlist ID."""
         query = urlparse(link)
@@ -152,7 +136,7 @@ class MusicSampler:
             if sample:
                 current_song = self.youtube_api.readable_data(link)
                 print(f"Songs sampled in {current_song[0]} \n")
-                sample_video_ids = [s[0] for s in sample]
+                #sample_video_ids = [s[0] for s in sample]
                 for s in sample:
                     print(f"{s[1]} - {s[2]}")
                 print("\n")
