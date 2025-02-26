@@ -33,7 +33,7 @@ class YouTubeAPI:
             #print([iterint(tracks)['snippet']['title'], item['snippet'] ,item['id']])
         #return [item['contentDetails']['videoId'] for item in track['items']] 
 
-    def searchYoutube(self, query):  
+    def searchYoutube(self, query):         
         request = self.youtube.search().list(
             part="snippet",
             maxResults=1,        
@@ -156,17 +156,17 @@ class MusicSampler:
     def find_song_samples(self, ids):
         """Find samples for a list of song IDs."""
         samples = []        
-        for id in ids:        
-            data= self.youtube_api.searchSongID(id)
+        for id in ids:                  
+            data = self.youtube_api.searchSongID(id)
             link_sample = self.whosampled_api.samples_url(data)
             sample_links = self.whosampled_api.sample_finder(link_sample)  
             samples.append(self.youtube_api.searchYoutube(sample_links))
-        return samples
+        return samples, data
 
     def read_samples(self, links, samples):
         """Read and print samples for a list of song links."""
         for link, sample in zip(links, samples):
-            if sample:
+            if sample:                
                 current_song = self.youtube_api.readable_data(link)
                 print(f"Songs sampled in {current_song[0]} \n")
                 sample_video_ids = [s[0] for s in sample]
@@ -179,11 +179,10 @@ class MusicSampler:
     def main(self):
         """Main function to find and read song samples."""
         link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=1b8r7gmgrMzJesz9"  # DAMN.
-        #link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_kjKrvYV6qUajvDig-qslOKxaHqYbRoYhI&si=H6PSXZab1fUGtToo"
+        link_youtube = "https://music.youtube.com/watch?v=2Q0VRrzff8c&si=S_8ykgT0-aujSISs"
         ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))        
-        samples = self.find_song_samples(ids)
-        print("yay")
-        #self.read_samples(ids, samples)
+        samples, data = self.find_song_samples(ids)        
+        self.read_samples(ids, samples)
 
 
 if __name__ == "__main__":
