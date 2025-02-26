@@ -46,22 +46,20 @@ def oauth():
 def main():     
     oauth()  
 
-    request = youtube.playlistItems().list(
-        part="snippet,contentDetails",
-        maxResults=25,
-        playlistId="OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ"
+   
+    request = youtube.search().list(
+        part="snippet",
+        maxResults=1,        
+        q="damn kendrick lamar"
     )
+    response = request.execute()
+   
+    for item in response['items']:
+        print(item)
+        print(item['snippet']['title'], item['snippet']['channelTitle'], item['snippet']['channelId'])
 
-    
-    tracks = request.execute()
-    cat = [item['contentDetails']['videoId'] for item in tracks['items']]
-    print(cat)
-
-    """for item in tracks['items']:
-        title = item['snippet']['title']
-        video_id = item['contentDetails']['videoId']
-        print(f"Title: {title}, Video ID: {video_id}")"""
-    
+   
+    #[song_data["videoDetails"]["title"], song_data["videoDetails"]["author"], song_data["microformat"]["microformatDataRenderer"]["urlCanonical"]]
     
     #return [track['videoId'] for track in self.youtube.playlistItems.list(self.playlist_link(link))['tracks']]
         

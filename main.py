@@ -14,11 +14,38 @@ class YouTubeAPI:
         """Initialize the YouTube API."""        
         self.youtube = oauth()
 
-    def songIdInPlaylist(self, id):        
+    def songsInPlaylist(self, id):        
         request = self.youtube.playlistItems().list(part="snippet,contentDetails", maxResults=25, playlistId=id)           
         tracks = request.execute()
         return [item['contentDetails']['videoId'] for item in tracks['items']]
+    
+    def searchSongID(self, id):
+        request = self.youtube.videos().list(
+            part="snippet,contentDetails,statistics",
+            id=id
+        )
+        response = request.execute()   
+      
+        for item in response['items']:        
+            return [item['snippet']['title'],item['snippet']['channelTitle'][:-8], id]
+                  
+
+            #print([iterint(tracks)['snippet']['title'], item['snippet'] ,item['id']])
+        #return [item['contentDetails']['videoId'] for item in track['items']] 
+
+    def searchYoutube(self, query):  
+        request = self.youtube.search().list(
+            part="snippet",
+            maxResults=1,        
+            q=query
+        )
+        response = request.execute()
         
+        #[song_data["videoDetails"]["title"], song_data["videoDetails"]["author"], song_data["microformat"]["microformatDataRenderer"]["urlCanonical"]]
+        for item in response['items']:            
+            return[item['snippet']['title'], item['snippet'] ,item['id']['videoId']]
+
+
 
     def link_to_id(self, link):
         """Convert a YouTube link to a video or playlist ID."""
@@ -27,7 +54,7 @@ class YouTubeAPI:
             return query.path[1:]
 
         if query.path == '/playlist':
-            return self.songIdInPlaylist(self.playlist_id(link))
+            return self.songsInPlaylist(self.playlist_id(link))
             
         if query.hostname in ('www.youtube.com', 'youtube.com', 'm.youtube.com'):
             if query.path == '/watch':
@@ -45,19 +72,10 @@ class YouTubeAPI:
     def playlist_id(self, link):
         """Extract the playlist ID from a YouTube link."""
         query = urlparse(link)
-        return parse_qs(query.query)['list'][0]
+        return parse_qs(query.query)['list'][0]      
 
-    def readable_data(self, id):
-        """Retrieve readable data for a YouTube video."""
-        song_data = self.youtube.get_song(id)
-
-        
-
-
-        return [song_data["videoDetails"]["title"], song_data["videoDetails"]["author"], song_data["microformat"]["microformatDataRenderer"]["urlCanonical"]]
-
-    def song_search(self, my_list=[]):
-        """Search for songs on YouTube."""
+    """ def song_search(self, my_list=[]):
+        #Search for songs on YouTube.
         b = []
         for i in my_list:
             a = self.youtube.search(query=i, filter="songs", limit=1, ignore_spelling=True)
@@ -65,7 +83,7 @@ class YouTubeAPI:
                 b.append([a[0]['videoId'], a[0]['title'], a[0]['artists'][0]['name'], a[0]['artists'][0]['id']])
             elif len(a) > 1:
                 b.append([a[1]['videoId'], a[1]['title'], a[1]['artists'][0]['name'], a[1]['artists'][0]['id']])
-        return b
+        return b """
 
     def add_to_playlist(self, pid, sid):
         """Add songs to a YouTube playlist."""
@@ -95,7 +113,7 @@ class WhoSampledAPI:
         }
 
     def samples_url(self, data):
-        """Construct the URL for samples of a song."""
+        """Construct the URL for samples of a song."""            
         data[0] = "-".join(data[0].split())
         data[1] = "-".join(data[1].split())
         return f"https://www.whosampled.com/{data[1]}/{data[0]}/samples"
@@ -137,11 +155,12 @@ class MusicSampler:
 
     def find_song_samples(self, ids):
         """Find samples for a list of song IDs."""
-        samples = []
-        for id in ids:
-            link_sample = self.whosampled_api.samples_url(self.youtube_api.readable_data(id))
-            sample_links = self.whosampled_api.sample_finder(link_sample)
-            samples.append(self.youtube_api.song_search(sample_links))
+        samples = []        
+        for id in ids:        
+            data= self.youtube_api.searchSongID(id)
+            link_sample = self.whosampled_api.samples_url(data)
+            sample_links = self.whosampled_api.sample_finder(link_sample)  
+            samples.append(self.youtube_api.searchYoutube(sample_links))
         return samples
 
     def read_samples(self, links, samples):
@@ -160,9 +179,10 @@ class MusicSampler:
     def main(self):
         """Main function to find and read song samples."""
         link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=1b8r7gmgrMzJesz9"  # DAMN.
+        #link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_kjKrvYV6qUajvDig-qslOKxaHqYbRoYhI&si=H6PSXZab1fUGtToo"
         ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))        
         samples = self.find_song_samples(ids)
-
+        print("yay")
         #self.read_samples(ids, samples)
 
 
