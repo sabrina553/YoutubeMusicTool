@@ -1,30 +1,21 @@
 import requests
-import configparser
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
-from ytmusicapi import YTMusic, OAuthCredentials
+
+from auth import oauth
 
 class YouTubeAPI:
+
+    
     def __init__(self):
         """Initialize the YouTubeAPI class."""
         self.ytm = None
         self.init()
 
-    def get_api_key(self, id):
-        """Retrieve the API key from the configuration file."""
-        config = configparser.ConfigParser()
-        config.read(filenames='.env/config.ini')
-        return config['oauth'][id]
-
-    def oauth(self):
-        """Authenticate with the YouTube API using OAuth."""
-        client_id = self.get_api_key("client_id")
-        client_secret = self.get_api_key("client_secret")
-        self.ytm = YTMusic(".env/oauth.json", oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))
-
     def init(self):
         """Initialize the YouTube API."""
-        self.oauth()
+        global ytm
+        ytm = oauth()
 
     def link_to_id(self, link):
         """Convert a YouTube link to a video or playlist ID."""
@@ -163,8 +154,9 @@ class MusicSampler:
         """Main function to find and read song samples."""
         link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=1b8r7gmgrMzJesz9"  # DAMN.
         ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube))
-        samples = self.find_song_samples(ids)
-        self.read_samples(ids, samples)
+        
+        #samples = self.find_song_samples(ids)
+        #self.read_samples(ids, samples)
 
 
 if __name__ == "__main__":

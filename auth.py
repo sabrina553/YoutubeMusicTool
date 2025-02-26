@@ -12,7 +12,7 @@ import googleapiclient.errors
 from google.oauth2.credentials import Credentials
 
 
-def init():
+def oauth():
     global youtube
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
@@ -42,8 +42,7 @@ def init():
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
 
-def main():
-    init()    
+""" def main():       
     request = youtube.videos().list(
         part="snippet,contentDetails,statistics",
         id="GfpxPWSH_qg"
@@ -54,4 +53,4 @@ def main():
     print(response)
 
 if __name__ == "__main__":
-    main()
+    main() """
