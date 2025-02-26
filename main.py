@@ -1,6 +1,6 @@
 import requests
 import configparser
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 from ytmusicapi import YTMusic, OAuthCredentials
 
@@ -46,40 +46,24 @@ def linkTOID(Link):
         return query.path[1:]
     
     if query.path == '/playlist': 
-        a = []
-        p = playlistLink(Link)        
-        #get tracks from playlist
-        playlist = ytm.get_playlist(p)
-        playlist = playlist['tracks']
-
-        #extract song id for playlist.
-        for i in playlist:
-            a.append(i['videoId'])
-
-        return a
+        return [track['videoId'] for track in ytm.get_playlist(playlistLink(Link))['tracks']]
             
     if query.hostname in ('www.youtube.com', 'youtube.com', 'm.youtube.com'):
         if query.path == '/watch':            
-            p = urlparse(query.query)            
-            return p[2][2:]
+            return parse_qs(query.query)['v'][0]
         if query.path[:7] == '/embed/':
             return query.path.split('/')[2]
         if query.path[:3] == '/v/':
             return query.path.split('/')[2]
         
-    if query.hostname in ('music.youtube.com'):
+    if query.hostname == 'music.youtube.com':
         if query.path == '/watch':            
-            p = urlparse(query.query)   
-            p = p[2][2:].partition("&")
-            return p[0]        
-    # fail?
+            return parse_qs(query.query)['v'][0]
     return None 
 
 def playlistLink(Link):               
-    #get playlist id from url  
     query = urlparse(Link)   
-    query = query.query[5:].partition("&")
-    return query[0]
+    return parse_qs(query.query)['list'][0]
 
 def convertToList(yay):
     id = []
@@ -161,8 +145,7 @@ def findSongSamples(ID):
     return(a)
 
 def readSamples(link, samples = []):
-    j=0    
-    counter = 0 
+    j=0        
     for i in link: 
         samplesVideoID = []  
         if len(samples[j]) > 0:            
@@ -173,14 +156,14 @@ def readSamples(link, samples = []):
                 print(f"{k[1]} - {k[2]}")                 
                 
             print("\n")
-            playlistAdder("https://music.youtube.com/playlist?list=PLv9DYoydAiAHk1y3FkE3rJ1Cbd_KNyYzn&si=g2lE5-e44jbfQqBq", samplesVideoID)  
+            playlistAdder("https://music.youtube.com/playlist?list=PLv9DYoydAiAEoznKQTydhtRlKddr8Q5Zv&si=tUYoVHkAG35YnTLf", samplesVideoID)  
         j+=1
     
 
 def main():    
     init()   
     
-    linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_m_zl1RNdUJwiB2Yi1ExSwNQ0Vh3U0-LBQ&si=c1p-TBNY5dIhSGoL" #DAMN.
+    linkYoutube = "https://music.youtube.com/playlist?list=OLAK5uy_mtraxOYqT3ybdDL1XzFHOXgbOH802nIkg" #DAMN.
     #linkYoutube = "https://music.youtube.com/watch?v=LfjmxgjNP2g&si=4mdjZ6LDygf9Xrsn" 
     id = linkTOID(linkYoutube)        
     id = convertToList(id)    
