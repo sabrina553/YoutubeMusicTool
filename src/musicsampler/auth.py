@@ -1,9 +1,10 @@
 import os, json, sys
 from ytmusicapi import YTMusic, OAuthCredentials, setup_oauth
+from system import system
+#from main import current_directory
 
 def unauth():
      return YTMusic()
-
 def get_api_key(file):
         """Retrieve the API key from the configuration file."""
         with open(file) as f:
@@ -12,9 +13,12 @@ def get_api_key(file):
 
 def oauth():
     #global youtube
-    dir_path = os.path.dirname(os.path.realpath(__file__))       
-    client_secrets_file = dir_path+"/.env/YOUR_CLIENT_SECRET_FILE.json"
-    oauth_file = dir_path+"/.env/oauth.json"       
+    dir_path = system.current_directory(None)
+    local_path = '/.env/auth/'
+    client_secrets_file = dir_path+local_path+"YOUR_CLIENT_SECRET_FILE.json"
+    oauth_file = dir_path+local_path+"oauth.json"   
+    
+        
     try :
         client_id, client_secret = get_api_key(client_secrets_file)
         

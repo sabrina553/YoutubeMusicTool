@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 class YouTubeAPI:
     def __init__(self):
         """Initialize the YouTubeAPI class."""
+        
         self.ytm = unauth()
         self.ytmauth = oauth()        
  
