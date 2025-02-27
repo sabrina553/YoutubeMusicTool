@@ -1,7 +1,8 @@
 import requests
+import math
 from bs4 import BeautifulSoup
 from system import system
-
+from youtube import YouTubeAPI
 
 class WhoSampledAPI:
     def __init__(self):
@@ -24,33 +25,53 @@ class WhoSampledAPI:
             "TE": "trailers",
             "Content-Type": "application/json"
         }
+
+
+
+        
     def samples_url(self, data):
         """Construct the URL for samples of a song."""
         data[0] = "-".join(data[0].split())
-        data[1] = "-".join(data[1].split())
+        data[1] = "-".join(data[1].split())       
         return f"https://www.whosampled.com/{data[1]}/{data[0]}"
     
+    def linktofilename(self, link):
+        """Convert a link to a filename."""
+        link = link.split("/")        
+        if len(link) == 5:  return f"{self.dir_path}/.env/cache/{link[-2]}-{link[-1]}.html"
+        if len(link) == 6:  return f"{self.dir_path}/.env/cache/{link[-3]}-{link[-2]}-{link[-1]}.html"
+        if len(link) == 7:  return f"{self.dir_path}/.env/cache/{link[-4]}-{link[-3]}-{link[-2]}-{link[-1]}.html"
     
-    def sample_finder(self, link, data):
+    
+    def sample_finder(self, link):
         """get whosampled html for a given song link."""
-
-        filename = f"{self.dir_path}/.env/cache/{data[1]}-{data[0]}-sample.html"
-        if system.path_exists(self, filename):
-            return self.parse_samples(filename)
+       
+        filename = self.linktofilename(link)
+        
+        if system.path_exists(self, filename):            
+            return filename
         
         response = self.session.get(link)
         if response.status_code == 404:
-            response = self.session.get(link[:-8])                
-        
+            print(f"404 - {link} not found.")  
+            return None      
+       
         with open(filename, 'wb') as f:
             f.write(response.content)
 
-        return self.parse_samples(filename, data)
-    
-    def parse_sample_main(self,link, data):
-        """parse from main page of whosampled for given song, the number of samples etc."""
+        return filename
         
-        filename = f"{self.dir_path}/.env/cache/{data[1]}-{data[0]}.html"
+        
+    
+    
+
+
+
+
+    
+    def parse_sample_main(self, filename):
+        """parse from main page of whosampled for given song, the number of samples etc."""
+                
         #samples, sampled, covered#
         sampleQuantityData = [0]*3
 
@@ -60,50 +81,70 @@ class WhoSampledAPI:
         j = []
         for i in soup.find_all("h3" , class_="section-header-title"):            
             i = str(i.contents[0])
+            
             i = i.split(' ')
             j.append(i)
             if "samples" in i:
                 sampleQuantityData[0] = int(i[3])
-            if "sampled" in i:
-                sampleQuantityData[1] = int(i[3])
-            if "covered" in i:
-                sampleQuantityData[2] = int(i[2])            
+            if "Sampled" in i:
+                sampleQuantityData[1] = int(i[2])
+            if "Covered" in i:
+                sampleQuantityData[2] = int(i[2])  
+      
         return sampleQuantityData
+
     
-    def sample_main_logic(self, sampleQuantityData, data):        
-        link = self.samples_url(data)
+       
+    def sample_main_logic(self, sampleQuantityData, link):  
+                      
         url = ["/samples", "/sampled", "/covered"]
         samples = []
-        if sampleQuantityData[0] > 3:
-            samples.append(self.parse_samples(link+url[0]))
-        if sampleQuantityData[1] > 3:
-            samples.append(self.parse_samples(link+url[1]))
-        if sampleQuantityData[2] > 3:            
-            samples.apeend(self.parse_samples(link+url[2]))
-        else:
-            self.parse_samples(link)
-        return samples
+        
+        n=0        
+        if sampleQuantityData[0] > 3: 
+            ceiling = math.ceil(sampleQuantityData[0]/16)
+            for i in range(ceiling):
+                self.sample_finder(f"{link}{url[0]}?cp={i+1}")
+                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[0]}?cp={i+1}")))            
+            
+            del samples[n][0:3]
+            n+=ceiling
 
+        if sampleQuantityData[1] > 3:
+            ceiling = math.ceil(sampleQuantityData[1]/16)            
+            for i in range(ceiling):            
+                self.sample_finder(f"{link}{url[1]}?cp={i+1}")                
+                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[1]}?cp={i+1}")))
+            
+            del samples[n][0:3]
+            n+=ceiling
+
+        if sampleQuantityData[2] > 3:    
+            ceiling = math.ceil(sampleQuantityData[2]/16) 
+            for i in range(ceiling):            
+                self.sample_finder(f"{link}{url[2]}?cp={i+1}")  
+                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[2]}?cp={i+1}")))
+            
+            del samples[n][0:3]
+            n+=ceiling
+
+        samples.append(self.parse_samples(self.linktofilename(link)))
+   
+    
+        return samples
+    
     def parse_samples(self,filename):
         """Parse the samples from the cached HTML."""
         with open(filename, 'rb') as f:
             soup = BeautifulSoup(f.read(), 'html.parser')
         samples = []
-
+        n = 0
         for i in soup.find_all("td", class_="tdata__td1"):
             i = (i.find('a'))
             i = str(i.contents[1])
             i = i.split('"')
             samples.append(i[1])
+            
         return samples
+    
 
-    def main(self):
-        #self.sample_finder("https://www.whosampled.com/The-Notorious-B.I.G./Hypnotize/",   ["Hypnotize", "The Notorious B.I.G."])
-        self.parse_sample_main("https://www.whosampled.com/The-Notorious-B.I.G./Hypnotize/",   ["Hypnotize", "The Notorious B.I.G."])
-        #self.parse_sample_main("https://www.whosampled.com/Kendrick-Lamar/DUCKWORTH./",   ["DUCKWORTH.", "Kendrick Lamar"])
-
-
-
-
-
-WhoSampledAPI().main()
