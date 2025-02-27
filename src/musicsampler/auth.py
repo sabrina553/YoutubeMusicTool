@@ -12,9 +12,9 @@ def get_api_key(file):
 
 def oauth():
     #global youtube
-        
-    client_secrets_file = ".env/YOUR_CLIENT_SECRET_FILE.json"
-    oauth_file = ".env/oauth.json"       
+    dir_path = os.path.dirname(os.path.realpath(__file__))       
+    client_secrets_file = dir_path+"/.env/YOUR_CLIENT_SECRET_FILE.json"
+    oauth_file = dir_path+"/.env/oauth.json"       
     try :
         client_id, client_secret = get_api_key(client_secrets_file)
         

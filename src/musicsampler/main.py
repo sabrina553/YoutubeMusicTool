@@ -1,7 +1,8 @@
-from whosampled import WhoSampledAPI
 from youtube import YouTubeAPI
+from whosampled import WhoSampledAPI
 
-class MusicSampler:
+
+class MusicSamplerBase:
     def __init__(self):
         """Initialize the MusicSampler class."""
         self.youtube_api = YouTubeAPI()
@@ -46,5 +47,5 @@ class MusicSampler:
 
 
 if __name__ == "__main__":
-    sampler = MusicSampler()
+    sampler = MusicSamplerBase()
     sampler.main()
