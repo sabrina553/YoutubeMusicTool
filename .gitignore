@@ -1,4 +1,7 @@
-.env/
 .venv/
-__pycache__/
-cache.html
+
+src/musicsampler/.env/auth/*
+src/musicsampler/.env/cache/*
+src/musicsampler/__pycache__
+
+
