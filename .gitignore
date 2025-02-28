@@ -1,4 +1,7 @@
 .venv/
+
+!./src/musicsampler/.env/
 src/musicsampler/.env/auth/*
 src/musicsampler/.env/cache/*
 src/musicsampler/__pycache__
+src/musicsampler/.env/auth/ytapi
