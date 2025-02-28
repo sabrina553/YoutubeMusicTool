@@ -1,6 +1,4 @@
-.env/
 .venv/
-__pycache__/
-cache.html
-YOUR_CLIENT_SECRET_FILE.json
-ouath.json
+src/musicsampler/.env/auth/*
+src/musicsampler/.env/cache/*
+src/musicsampler/__pycache__
