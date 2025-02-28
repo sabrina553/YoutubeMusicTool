@@ -7,9 +7,9 @@ all: venv
 $(VENV)/bin/activate: requirements.txt
 	python3 -m venv $(VENV)
 	./$(VENV)/bin/pip install -r requirements.txt
-	mkdir /src/musicsampler/.env/
-	mkdir /src/musicsampler/.env/auth
-	mkdir /src/musicsampler/.env/cache
+	mkdir src/musicsampler/.env/
+	mkdir src/musicsampler/.env/auth
+	mkdir src/musicsampler/.env/cache
 
 # venv is a shortcut target
 venv: $(VENV)/bin/activate
