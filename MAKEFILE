@@ -1,0 +1,24 @@
+# Define variables
+PYTHON = python3
+PIP = pip3
+VENV_DIR = venv
+REQUIREMENTS = requirements.txt
+SRC_DIR = src/musicsampler
+
+# Default target
+all: install
+
+# Create virtual environment
+$(VENV_DIR)/bin/activate:
+    $(PYTHON) -m venv $(VENV_DIR)
+
+# Install dependencies
+install: $(VENV_DIR)/bin/activate# Define variables
+PYTHON = python3
+PIP = pip3
+VENV_DIR = venv
+REQUIREMENTS = requirements.txt
+SRC_DIR = src/musicsampler
+
+# Default target
+all: install
