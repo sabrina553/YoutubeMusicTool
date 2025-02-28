@@ -18,14 +18,14 @@ def oauth():
     
     system.folder_check(None, dir_path+"/.env")   
 
-    client_secrets_file = dir_path+local_path+"YOUR_CLIENT_SECRET_FILE.json"
+    client_secrets_file = dir_path+local_path+"client_secret.json"
     oauth_file = dir_path+local_path+"oauth.json"       
         
     try :
         client_id, client_secret = get_api_key(client_secrets_file)
         
     except: 
-        print("Client secrets file not found. \nPlease Download TV OAUTH2 Client-Secret from console.cloud.google.com and save as MusicSampler/.env/ytmapi/YOUR_CLIENT_SECRET_FILE.json")
+        print("Client secrets file not found. \nPlease Download TV OAUTH2 Client-Secret from console.cloud.google.com and save as MusicSampler/.env/ytmapi/client_secret.json")
         sys.exit(0)
         
     if not os.path.exists(oauth_file):            
