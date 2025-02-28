@@ -53,5 +53,18 @@ class YouTubeAPI:
     def add_to_playlist(self, pid, sid):
         """Add songs to a YouTube playlist."""
         pid = self.playlist_link(pid)
-        self.ytmauth.add_playlist_items(playlistId=pid, videoIds=sid, duplicates=False)
+        print(len(sid))
+        for i in range(0, len(sid), 20):
+        # call our helper to process a sub list            
+            self.ytmauth.add_playlist_items(playlistId=pid, videoIds=sid[i:i+20], duplicates=False)
 
+
+    def create_playlist(self, title, description, songs):
+        return self.ytmauth.create_playlist(title=title, description=description, songs=songs)
+
+    """
+    def playlist_data(self, link):
+        id = self.link_to_id(link)
+        playlistdata = self.ytmauth.get_playlist(id)
+        print(playlistdata)
+    """
