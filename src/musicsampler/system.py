@@ -9,3 +9,11 @@ class system():
 
     def path_exists(self, file):
         return os.path.exists(file)
+    
+    def folder_check(self, file):
+        if not os.path.exists(file):
+            os.makedirs(file)        
+        if not os.path.exists(file+"/auth"):
+            os.makedirs(file+"/auth")
+        if not os.path.exists(file+"/cache"):
+            os.makedirs(file+"/cache")
