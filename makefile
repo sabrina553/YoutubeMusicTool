@@ -1,5 +1,5 @@
 # define the name of the virtual environment directory
-VENV := venv
+VENV := .venv
 
 # default target, when make executed without arguments
 all: venv
@@ -12,7 +12,7 @@ $(VENV)/bin/activate: requirements.txt
 venv: $(VENV)/bin/activate
 
 run: venv
-	./$(VENV)/bin/python3 app.py
+	./$(VENV)/bin/python3 src/musicsampler/main.py
 
 clean:
 	rm -rf $(VENV)
