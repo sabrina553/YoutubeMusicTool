@@ -7,15 +7,14 @@ class MusicSamplerBase:
         """Initialize the MusicSampler class."""
         self.youtube_api = YouTubeAPI()
         self.whosampled_api = WhoSampledAPI()
-
            
     def convert_to_list(self, yay):
         """Convert a single item to a list if necessary."""
         return yay if isinstance(yay, list) else [yay]
 
-    def flatten(self, matrix):
+    def flatten(self, list):
         flat_list = []
-        for i in matrix:
+        for i in list:
             for j in i:
                 flat_list.append(j)
         return flat_list
@@ -61,21 +60,20 @@ class MusicSamplerBase:
         description = f""
         songs = ""        
         return YouTubeAPI.create_playlist(title, description, songs)
+    
+    def url_To_Samples(self, link):
+        ids = self.convert_to_list(self.youtube_api.link_to_id(link)) 
+        samples = self.find_song_samples(ids)       
+        self.read_samples(ids, samples, link)
+        
 
     def main(self):
-        """Main function to find and read song samples."""        
-        link_youtube = "https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8"  # DAMN.
-        link_youtube = "https://music.youtube.com/watch?v=Dm-foWGDBF0&si=vva57r3OT6_Jdi6o"
-        link_youtube = "https://music.youtube.com/watch?v=H9NuWEeODew&si=QDBiGNXdVoYTr3-N"
-        ids = self.convert_to_list(self.youtube_api.link_to_id(link_youtube)) 
-        samples = self.find_song_samples(ids)       
-        self.read_samples(ids, samples, link_youtube)
+        """Main function to find and read song samples."""    
+        self.url_To_Samples("https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8")    # DAMN.
+        self.url_To_Samples("https://music.youtube.com/watch?v=Dm-foWGDBF0&si=vva57r3OT6_Jdi6o")
+        self.url_To_Samples("https://music.youtube.com/watch?v=H9NuWEeODew&si=QDBiGNXdVoYTr3-N")
         
-        #cat = self.whosampled_api.sample_finder("https://www.whosampled.com/The-Notorious-B.I.G./Hypnotize/",   ["Hypnotize", "The Notorious B.I.G."])
-        #print(cat)
         
-
-
 if __name__ == "__main__":
     sampler = MusicSamplerBase()
     sampler.main()
