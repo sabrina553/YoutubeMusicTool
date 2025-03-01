@@ -1,12 +1,14 @@
-from youtube import YouTubeAPI
-from whosampled import WhoSampledAPI
+#from youtube import YouTubeAPI
+import whosampled
+import youtube
 
 class MusicSamplerBase:    
    
     def __init__(self):
         """Initialize the MusicSampler class."""
-        self.youtube_api = YouTubeAPI()
-        self.whosampled_api = WhoSampledAPI()
+        self.youtube_api = youtube.YouTubeAPI()
+        self.whosampled_api = whosampled.WhoSampledAPI()
+        
            
     def convert_to_list(self, yay):
         """Convert a single item to a list if necessary."""
@@ -19,12 +21,12 @@ class MusicSamplerBase:
                 flat_list.append(j)
         return flat_list
     
-    def find_song_samples(self, ids):
+    def find_song_samples(self, obj_song):
         """Find samples for a list of song IDs.""" 
-        samples = []  
-             
-        for id in ids:
-            data = self.youtube_api.readable_data(id)   
+        samples = []              
+        for song in obj_song:
+            data = [song.title,  song.artist, song.videoID]
+            #data = self.youtube_api.readable_data(id)   
             link_sample = self.whosampled_api.samples_url(data)            
             sample_filename = self.whosampled_api.sample_finder(link_sample)             
             sampleQuantityData = self.whosampled_api.parse_sample_main(sample_filename)   
@@ -59,19 +61,23 @@ class MusicSamplerBase:
         title = f""
         description = f""
         songs = ""        
-        return YouTubeAPI.create_playlist(title, description, songs)
+        return youtube.create_playlist(title, description, songs)
     
     def url_To_Samples(self, link):
-        ids = self.convert_to_list(self.youtube_api.link_to_id(link)) 
-        samples = self.find_song_samples(ids)       
-        self.read_samples(ids, samples, link)
+        self.song_objects = self.convert_to_list(self.youtube_api.link_to_id(link))  
+        #print(self.song_objects)
+        samples = self.find_song_samples(self.song_objects)   
+        print(samples)
+
+
+        #self.read_samples(ids, samples, link)
         
 
     def main(self):
         """Main function to find and read song samples."""    
         self.url_To_Samples("https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8")    # DAMN.
         self.url_To_Samples("https://music.youtube.com/watch?v=Dm-foWGDBF0&si=vva57r3OT6_Jdi6o")
-        self.url_To_Samples("https://music.youtube.com/watch?v=H9NuWEeODew&si=QDBiGNXdVoYTr3-N")
+        #self.url_To_Samples("https://music.youtube.com/watch?v=H9NuWEeODew&si=QDBiGNXdVoYTr3-N")
         
         
 if __name__ == "__main__":
