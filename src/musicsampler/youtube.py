@@ -66,7 +66,7 @@ class song:
         return self
     
     def readSamples(self):
-        print(f"Sampled in {self.title}")
+        print(f"\n Sampled in {self.title}")
         for i in self.samplesSong:
             print(i.title)         
     
@@ -78,10 +78,10 @@ class song:
         return self 
     
     def samplesIDtoObject(self):        
-        for i in self.samplesYoutubeID:
+        for i in self.samplesYoutubeID:            
             song_instance = song()            
             self.samplesSong.append(song_instance.populate_from_id(i))
-                     
+        return self
 
 class YouTubeAPI:
     def __init__(self):

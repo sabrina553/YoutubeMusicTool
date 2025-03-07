@@ -39,7 +39,7 @@ class MusicSamplerBase:
         for i in self.song_objects:   
             for j in i.samples:                          
                 self.youtube_api.song_search(j,i)
-            i.samplesIDtoObject
+            i.samplesIDtoObject()
                   
     def read_song_objects(self):
         """read song and it's sampled"""
@@ -60,12 +60,12 @@ class MusicSamplerBase:
         """Main function to find and read song samples."""    
         #self.url_To_Samples("https://music.youtube.com/watch?v=J9JFXTENxvo&si=KfXhg0q7AAuacMsa")
         self.url_to_objects("https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8")    # DAMN.
-        print("1")
+        
         self.find_song_samples()
-        print("2")
+        
         self.samples_to_youtube()      
         
-        print("3")   
+    
         self.read_song_objects()
 
         #self.url_To_Samples("https://music.youtube.com/watch?v=Dm-foWGDBF0&si=vva57r3OT6_Jdi6o")

@@ -1,5 +1,6 @@
 import requests
 import math
+import time
 from system import system
 from bs4 import BeautifulSoup
 
@@ -42,15 +43,33 @@ class WhoSampledAPI:
         if system.path_exists(self, filename):            
             return filename
         
-        response = self.session.get(link)
-        if response.status_code == 404:
-            print(f"404 - {link} not found.")  
-            return None      
-       
-        with open(filename, 'wb') as f:
-            f.write(response.content)
+        try:
+            response = self.session.get(link)      
+            response.raise_for_status()
+                   
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print("429 - Too Many Requests")                
+                time.sleep(2)                
+                return self.sample_finder(link)
+            else:
+                raise
 
-        return filename
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                print(f"404 - {link} not found.")
+                return None
+            else:
+                raise       
+        
+        else: 
+            with open(filename, 'wb') as f:
+                f.write(response.content)
+
+            return filename
+      
+        
+        
         
     
     def parse_sample_main(self, filename):
@@ -74,47 +93,30 @@ class WhoSampledAPI:
                 sampleQuantityData[1] = int(i[2])
             if "Covered" in i:
                 sampleQuantityData[2] = int(i[2])  
-      
+
         return sampleQuantityData
            
-    def sample_main_logic(self, sampleQuantityData, link):  
-                      
+    def sample_main_logic(self, sampleQuantityData, link):                       
         url = ["/samples", "/sampled", "/covered"]
-        samples = []
-        
-        n=0        
-        if sampleQuantityData[0] > 3: 
-            ceiling = math.ceil(sampleQuantityData[0]/16)
-            for i in range(ceiling):
-                self.sample_finder(f"{link}{url[0]}?cp={i+1}")
-                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[0]}?cp={i+1}")))            
-            
-            del samples[n][0:3]
-            n+=ceiling
+        samples = []        
+        n=0    
+        for x in range(3):            
+            if sampleQuantityData[x] > 3:
+                ceiling = math.ceil(sampleQuantityData[x]/16)
 
-        if sampleQuantityData[1] > 3:
-            ceiling = math.ceil(sampleQuantityData[1]/16)            
-            for i in range(ceiling):            
-                self.sample_finder(f"{link}{url[1]}?cp={i+1}")                
-                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[1]}?cp={i+1}")))
-            
-            del samples[n][0:3]
-            n+=ceiling
+                for i in range(ceiling):
+                    templink = f"{link}{url[x]}?cp={i+1}"
+                    self.sample_finder(templink)
+                    samples.append(self.parse_samples(self.linktofilename(templink)))
+                
+                del samples[n][0:3]
+                n+=ceiling      
 
-        if sampleQuantityData[2] > 3:    
-            ceiling = math.ceil(sampleQuantityData[2]/16) 
-            for i in range(ceiling):            
-                self.sample_finder(f"{link}{url[2]}?cp={i+1}")  
-                samples.append(self.parse_samples(self.linktofilename(f"{link}{url[2]}?cp={i+1}")))
-            
-            del samples[n][0:3]
-            n+=ceiling
-
-        samples.append(self.parse_samples(self.linktofilename(link)))
-   
+        samples.append(self.parse_samples(self.linktofilename(link)))  
     
         return samples
     
+
     def parse_samples(self,filename):
         """Parse the samples from the cached HTML."""
         with open(filename, 'rb') as f:

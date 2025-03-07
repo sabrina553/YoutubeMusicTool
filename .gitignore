@@ -5,3 +5,4 @@ src/musicsampler/.env/cache/*
 src/musicsampler/__pycache__
 
 
+.vscode/launch.json
