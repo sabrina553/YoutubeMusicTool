@@ -30,8 +30,7 @@ class playlist:
         
         for i in self.playlistData['tracks']:                                 
             song_instance = song()
-            song_instance.populate_from_id(i['videoId'])
-            self.songs.append(song_instance)           
+            self.songs.append(song_instance.populate_from_id(i['videoId']))                   
 
         return self
       
