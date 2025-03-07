@@ -1,12 +1,12 @@
 import requests
 import math
-from bs4 import BeautifulSoup
 from system import system
-from youtube import YouTubeAPI
+from bs4 import BeautifulSoup
+
 
 class WhoSampledAPI:
     def __init__(self):
-        """Initialize the WhoSampledAPI class."""
+        """Initialize the WhoSampledAPI class."""        
         self.dir_path = system.current_directory(self)
         self.session = requests.Session()
         self.session.headers = {
@@ -25,18 +25,9 @@ class WhoSampledAPI:
             "TE": "trailers",
             "Content-Type": "application/json"
         }
-
-
-
-        
-    def samples_url(self, data):
-        """Construct the URL for samples of a song."""
-        data[0] = "-".join(data[0].split())
-        data[1] = "-".join(data[1].split())       
-        return f"https://www.whosampled.com/{data[1]}/{data[0]}"
-    
+             
     def linktofilename(self, link):
-        """Convert a link to a filename."""
+        """Convert a link to a filename."""        
         link = link.split("/")        
         if len(link) == 5:  return f"{self.dir_path}/.env/cache/{link[-2]}-{link[-1]}.html"
         if len(link) == 6:  return f"{self.dir_path}/.env/cache/{link[-3]}-{link[-2]}-{link[-1]}.html"
@@ -45,7 +36,7 @@ class WhoSampledAPI:
     
     def sample_finder(self, link):
         """get whosampled html for a given song link."""
-       
+        
         filename = self.linktofilename(link)
         
         if system.path_exists(self, filename):            
@@ -61,13 +52,6 @@ class WhoSampledAPI:
 
         return filename
         
-        
-    
-    
-
-
-
-
     
     def parse_sample_main(self, filename):
         """parse from main page of whosampled for given song, the number of samples etc."""
@@ -92,9 +76,7 @@ class WhoSampledAPI:
                 sampleQuantityData[2] = int(i[2])  
       
         return sampleQuantityData
-
-    
-       
+           
     def sample_main_logic(self, sampleQuantityData, link):  
                       
         url = ["/samples", "/sampled", "/covered"]
