@@ -1,6 +1,9 @@
 #from youtube import YouTubeAPI
 import whosampled
 import youtube
+from multiprocessing import Process, Manager
+#import os
+
 
 class MusicSamplerBase:    
    
@@ -56,21 +59,42 @@ class MusicSamplerBase:
         songs = ""        
         return youtube.create_playlist(title, description, songs)
       
-    def main(self):
+    def main(self, url):
         """Main function to find and read song samples."""    
-        #self.url_To_Samples("https://music.youtube.com/watch?v=J9JFXTENxvo&si=KfXhg0q7AAuacMsa")
-        self.url_to_objects("https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8")    # DAMN.
+        #self.url_to_objects("https://music.youtube.com/watch?v=J9JFXTENxvo&si=KfXhg0q7AAuacMsa")
+        self.url_to_objects(url)    # DAMN.        
+        self.find_song_samples()   
         
-        self.find_song_samples()
-        
-        self.samples_to_youtube()      
-        
-    
+
+        a = len(sampler.song_objects)
+        print(a)
+        ###multithread###   
+        with Manager() as manager:
+            processes = []
+            for i in self.song_objects:
+                print(i)
+                process = Process(target=self._process_samples_to_youtube, args=(i,))
+                processes.append(process)
+                process.start()
+            
+            for process in processes:
+                process.join()
+        ###         ###
         self.read_song_objects()
 
-        #self.url_To_Samples("https://music.youtube.com/watch?v=Dm-foWGDBF0&si=vva57r3OT6_Jdi6o")
-        #self.url_To_Samples("https://music.youtube.com/watch?v=H9NuWEeODew&si=QDBiGNXdVoYTr3-N")
-                
+    def _process_samples_to_youtube(self, song_object):
+        """Helper function to process samples to YouTube in a separate thread."""
+        for sample in song_object.samples:
+            self.youtube_api.song_search(sample, song_object)
+            song_object.samplesIDtoObject()
+        
+        
+
+        
+
+             
 if __name__ == "__main__":
     sampler = MusicSamplerBase()
-    sampler.main()
+    url = "https://music.youtube.com/playlist?list=OLAK5uy_nFiS1SeXBnJII-kBfpg7kGRB0JeE_tot8"
+    
+    sampler.main(url)   
